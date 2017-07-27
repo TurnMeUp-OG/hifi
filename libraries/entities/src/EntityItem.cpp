@@ -23,8 +23,8 @@
 #include <PhysicsHelpers.h>
 #include <RegisteredMetaTypes.h>
 #include <SharedUtil.h> // usecTimestampNow()
+#include <SoundCache.h>
 #include <LogHandler.h>
-#include <Extents.h>
 
 #include "EntityScriptingInterface.h"
 #include "EntitiesLogging.h"
@@ -89,8 +89,7 @@ EntityItem::EntityItem(const EntityItemID& entityItemID) :
 
 EntityItem::~EntityItem() {
     // clear out any left-over actions
-    EntityTreeElementPointer element = _element; // use local copy of _element for logic below
-    EntityTreePointer entityTree = element ? element->getTree() : nullptr;
+    EntityTreePointer entityTree = _element ? _element->getTree() : nullptr;
     EntitySimulationPointer simulation = entityTree ? entityTree->getSimulation() : nullptr;
     if (simulation) {
         clearActions(simulation);
@@ -145,9 +144,6 @@ EntityPropertyFlags EntityItem::getEntityProperties(EncodeBitstreamParams& param
     requestedProperties += PROP_OWNING_AVATAR_ID;
 
     requestedProperties += PROP_LAST_EDITED_BY;
-
-	requestedProperties += PROP_ISSEAT;
-	requestedProperties += PROP_CURRENTSEATUSER;
 
     return requestedProperties;
 }
@@ -297,9 +293,6 @@ OctreeElement::AppendState EntityItem::appendEntityData(OctreePacketData* packet
         APPEND_ENTITY_PROPERTY(PROP_PARENT_JOINT_INDEX, getParentJointIndex());
         APPEND_ENTITY_PROPERTY(PROP_QUERY_AA_CUBE, getQueryAACube());
         APPEND_ENTITY_PROPERTY(PROP_LAST_EDITED_BY, getLastEditedBy());
-
-		APPEND_ENTITY_PROPERTY(PROP_ISSEAT, getIsSeat());
-		APPEND_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, getCurrentSeatUser());
 
         appendSubclassData(packetData, params, entityTreeElementExtraEncodeData,
                                 requestedProperties,
@@ -822,9 +815,6 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
 
     READ_ENTITY_PROPERTY(PROP_REGISTRATION_POINT, glm::vec3, updateRegistrationPoint);
 
-	READ_ENTITY_PROPERTY(PROP_ISSEAT, bool, setIsSeat);
-	READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QString, setCurrentSeatUser);
-
     READ_ENTITY_PROPERTY(PROP_ANGULAR_DAMPING, float, updateAngularDamping);
     READ_ENTITY_PROPERTY(PROP_VISIBLE, bool, setVisible);
     READ_ENTITY_PROPERTY(PROP_COLLISIONLESS, bool, updateCollisionless);
@@ -890,9 +880,8 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     // Tracking for editing roundtrips here. We will tell our EntityTree that we just got incoming data about
     // and entity that was edited at some time in the past. The tree will determine how it wants to track this
     // information.
-    EntityTreeElementPointer element = _element; // use local copy of _element for logic below
-    if (element && element->getTree()) {
-        element->getTree()->trackIncomingEntityLastEdited(lastEditedFromBufferAdjusted, bytesRead);
+    if (_element && _element->getTree()) {
+        _element->getTree()->trackIncomingEntityLastEdited(lastEditedFromBufferAdjusted, bytesRead);
     }
 
 
@@ -997,6 +986,21 @@ void EntityItem::setCollisionSoundURL(const QString& value) {
             myTree->notifyNewCollisionSoundURL(value, getEntityItemID());
         }
     }
+}
+
+SharedSoundPointer EntityItem::getCollisionSound() {
+    SharedSoundPointer result;
+    withReadLock([&] {
+        result = _collisionSound;
+    });
+
+    if (!result) {
+        result = DependencyManager::get<SoundCache>()->getSound(_collisionSoundURL);
+        withWriteLock([&] {
+            _collisionSound = result;
+        });
+    }
+    return result;
 }
 
 void EntityItem::simulate(const quint64& now) {
@@ -1226,9 +1230,6 @@ EntityItemProperties EntityItem::getProperties(EntityPropertyFlags desiredProper
 
     properties._type = getType();
 
-	COPY_ENTITY_PROPERTY_TO_PROPERTIES(isSeat, getIsSeat);
-	COPY_ENTITY_PROPERTY_TO_PROPERTIES(currentSeatUser, getCurrentSeatUser);
-
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(simulationOwner, getSimulationOwner);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(position, getLocalPosition);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(dimensions, getDimensions); // NOTE: radius is obsolete
@@ -1364,9 +1365,6 @@ bool EntityItem::setProperties(const EntityItemProperties& properties) {
     SET_ENTITY_PROPERTY_FROM_PROPERTIES(owningAvatarID, setOwningAvatarID);
 
     SET_ENTITY_PROPERTY_FROM_PROPERTIES(lastEditedBy, setLastEditedBy);
-
-	SET_ENTITY_PROPERTY_FROM_PROPERTIES(isSeat, setIsSeat);
-	SET_ENTITY_PROPERTY_FROM_PROPERTIES(currentSeatUser, setCurrentSeatUser);
 
     AACube saveQueryAACube = _queryAACube;
     checkAndAdjustQueryAACube();
@@ -2073,8 +2071,7 @@ bool EntityItem::removeActionInternal(const QUuid& actionID, EntitySimulationPoi
     _previouslyDeletedActions.insert(actionID, usecTimestampNow());
     if (_objectActions.contains(actionID)) {
         if (!simulation) {
-        EntityTreeElementPointer element = _element; // use local copy of _element for logic below
-            EntityTreePointer entityTree = element ? element->getTree() : nullptr;
+            EntityTreePointer entityTree = _element ? _element->getTree() : nullptr;
             simulation = entityTree ? entityTree->getSimulation() : nullptr;
         }
 
@@ -2653,6 +2650,12 @@ QString EntityItem::getCollisionSoundURL() const {
     return result;
 }
 
+void EntityItem::setCollisionSound(SharedSoundPointer sound) { 
+    withWriteLock([&] {
+        _collisionSound = sound;
+    });
+}
+
 glm::vec3 EntityItem::getRegistrationPoint() const { 
     glm::vec3 result;
     withReadLock([&] {
@@ -2716,32 +2719,6 @@ void EntityItem::setVisible(bool value) {
     withWriteLock([&] {
         _visible = value;
     });
-}
-
-bool EntityItem::getIsSeat() const{
-	bool result;
-	withReadLock([&] {
-		result = _isSeat;
-	});
-	return result;
-}
-void EntityItem::setIsSeat(bool value) {
-	withWriteLock([&] {
-		_isSeat = value;
-	});
-}
-QString EntityItem::getCurrentSeatUser() const{
-	QString result;
-	withReadLock([&] {
-		result =  _currentSeatUser;
-	});
-	return result;
-}
-void EntityItem::setCurrentSeatUser(const QString& value) {
-	withWriteLock([&] {
-		_currentSeatUser = value;
-	});
-
 }
 
 bool EntityItem::getCollisionless() const { 

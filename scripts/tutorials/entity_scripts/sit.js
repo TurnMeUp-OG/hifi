@@ -63,20 +63,42 @@
         this.cleanupOverlay();
     }
 
-    this.setSeatUser = function (Seat) {
+    this.setSeatUser = function(user) {
         try {
+            var userData = Entities.getEntityProperties(this.entityID, ["userData"]).userData;
+            userData = JSON.parse(userData);
+
+            if (user !== null) {
+                userData.seat.user = user;
+            } else {
+                delete userData.seat.user;
+            }
+
             Entities.editEntity(this.entityID, {
-                IsSeat: Seat
+                userData: JSON.stringify(userData)
             });
         } catch (e) {
             // Do Nothing
         }
-
     }
     this.getSeatUser = function() {
         try {
-            var properties = Entities.getEntityProperties(this.entityID, ["IsSeat"]);
-            return properties.IsSeat;
+            var properties = Entities.getEntityProperties(this.entityID, ["userData", "position"]);
+            var userData = JSON.parse(properties.userData);
+
+            // If MyAvatar return my uuid
+            if (userData.seat.user === MyAvatar.sessionUUID) {
+                return userData.seat.user;
+            }
+
+
+            // If Avatar appears to be sitting
+            if (userData.seat.user) {
+                var avatar = AvatarList.getAvatar(userData.seat.user);
+                if (avatar &&  (Vec3.distance(avatar.position, properties.position) < RELEASE_DISTANCE)) {
+                    return userData.seat.user;
+                }
+            }
         } catch (e) {
             // Do nothing
         }
@@ -118,7 +140,7 @@
 
         var previousValue = Settings.getValue(SETTING_KEY);
         Settings.setValue(SETTING_KEY, this.entityID);
-        this.setSeatUser(true);
+        this.setSeatUser(MyAvatar.sessionUUID);
         if (previousValue === "") {
             MyAvatar.characterControllerEnabled = false;
             MyAvatar.hmdLeanRecenterEnabled = false;
@@ -150,7 +172,7 @@
         Script.update.disconnect(this, this.update);
 
         if (MyAvatar.sessionUUID === this.getSeatUser()) {
-            this.setSeatUser(false);
+            this.setSeatUser(null);
         }
 
         if (Settings.getValue(SETTING_KEY) === this.entityID) {
