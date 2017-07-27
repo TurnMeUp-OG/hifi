@@ -105,7 +105,6 @@ public:
         UsernameFromIDReply,
         ViewFrustum,
         RequestsDomainListData,
-        ExitingSpaceBubble,
         PerAvatarGainSet,
         EntityScriptGetStatus,
         EntityScriptGetStatusReply,
@@ -122,6 +121,7 @@ public:
         ReplicatedAvatarIdentity,
         ReplicatedKillAvatar,
         ReplicatedBulkAvatarData,
+		Seat,
         NUM_PACKET_TYPE
     };
 };

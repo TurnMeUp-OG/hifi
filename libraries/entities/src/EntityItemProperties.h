@@ -15,6 +15,7 @@
 #include <stdint.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/component_wise.hpp>
 
 #include <QtScript/QScriptEngine>
 #include <QtCore/QObject>
@@ -101,6 +102,9 @@ public:
     // bool fooChanged() const;
     // type _foo { value };
     // bool _fooChanged { false };
+
+	DEFINE_PROPERTY(PROP_ISSEAT, IsSeat, isSeat, bool, ENTITY_ITEM_DEFAULT_ISSEAT);
+	DEFINE_PROPERTY_REF(PROP_CURRENTSEATUSER, CurrentSeatUser, currentSeatUser, QString, "");
 
     DEFINE_PROPERTY(PROP_VISIBLE, Visible, visible, bool, ENTITY_ITEM_DEFAULT_VISIBLE);
     DEFINE_PROPERTY_REF_WITH_SETTER(PROP_POSITION, Position, position, glm::vec3, ENTITY_ITEM_ZERO_VEC3);

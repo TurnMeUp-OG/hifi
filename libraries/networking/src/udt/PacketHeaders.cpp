@@ -97,6 +97,8 @@ PacketVersion versionForPacketType(PacketType packetType) {
         case PacketType::MicrophoneAudioWithEcho:
         case PacketType::AudioStreamStats:
             return static_cast<PacketVersion>(AudioVersion::HighDynamicRangeVolume);
+		case PacketType::Seat:
+			return 19;
 
         default:
             return 17;
