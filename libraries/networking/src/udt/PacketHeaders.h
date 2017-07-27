@@ -122,6 +122,7 @@ public:
         ReplicatedAvatarIdentity,
         ReplicatedKillAvatar,
         ReplicatedBulkAvatarData,
+		Seat,
         NUM_PACKET_TYPE
     };
 };
