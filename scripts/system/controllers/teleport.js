@@ -423,8 +423,8 @@ function getTeleportTargetType(intersection) {
         return TARGET.NONE;
     }
 
-    var props = Entities.getEntityProperties(intersection.entityID, ['IsSeat', 'visible']);
-    if (props.IsSeat) {
+    var props = Entities.getEntityProperties(intersection.entityID, ['isSeat', 'visible']);
+    if (props.isSeat) {
         return TARGET.SEAT;
     }
 

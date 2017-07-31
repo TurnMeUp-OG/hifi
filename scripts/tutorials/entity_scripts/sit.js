@@ -63,20 +63,27 @@
         this.cleanupOverlay();
     }
 
-    this.setSeatUser = function (Seat) {
+    this.setSeatUser = function(user) {
         try {
+            var userData = Entities.getEntityProperties(this.entityID, ["isSeat","currentSeatUser"]);
+
             Entities.editEntity(this.entityID, {
-                IsSeat: Seat
+                isSeat: true,
+				currentSeatUser: user
             });
         } catch (e) {
             // Do Nothing
         }
-
     }
     this.getSeatUser = function() {
         try {
-            var properties = Entities.getEntityProperties(this.entityID, ["IsSeat"]);
-            return properties.IsSeat;
+            var properties = Entities.getEntityProperties(this.entityID, ["isSeat", "currentSeatUser"]);
+
+            // If MyAvatar return my uuid
+            if (properties.currentSeatUser === MyAvatar.sessionUUID) {
+                return properties.currentSeatUser;
+            }
+				
         } catch (e) {
             // Do nothing
         }
@@ -118,7 +125,7 @@
 
         var previousValue = Settings.getValue(SETTING_KEY);
         Settings.setValue(SETTING_KEY, this.entityID);
-        this.setSeatUser(true);
+        this.setSeatUser(MyAvatar.sessionUUID);
         if (previousValue === "") {
             MyAvatar.characterControllerEnabled = false;
             MyAvatar.hmdLeanRecenterEnabled = false;
@@ -150,7 +157,7 @@
         Script.update.disconnect(this, this.update);
 
         if (MyAvatar.sessionUUID === this.getSeatUser()) {
-            this.setSeatUser(false);
+            this.setSeatUser(null);
         }
 
         if (Settings.getValue(SETTING_KEY) === this.entityID) {
