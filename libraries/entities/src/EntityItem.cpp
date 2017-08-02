@@ -822,7 +822,7 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     READ_ENTITY_PROPERTY(PROP_REGISTRATION_POINT, glm::vec3, updateRegistrationPoint);
 
 	READ_ENTITY_PROPERTY(PROP_ISSEAT, bool, setIsSeat);
-	READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QString, setCurrentSeatUser);
+	READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QUuid, setCurrentSeatUser);
 
     READ_ENTITY_PROPERTY(PROP_ANGULAR_DAMPING, float, updateAngularDamping);
     READ_ENTITY_PROPERTY(PROP_VISIBLE, bool, setVisible);
@@ -2748,16 +2748,16 @@ void EntityItem::setIsSeat(bool value) {
 		_isSeat = value;
 	});
 }
-QString EntityItem::getCurrentSeatUser() const{
-	QString result;
+QUuid EntityItem::getCurrentSeatUser() const{
+	QUuid result;
 	withReadLock([&] {
 		result =  _currentSeatUser;
 	});
 	return result;
 }
-void EntityItem::setCurrentSeatUser(const QString& value) {
+void EntityItem::setCurrentSeatUser(const QUuid& id) {
 	withWriteLock([&] {
-		_currentSeatUser = value;
+		_currentSeatUser = id;
 	});
 
 }

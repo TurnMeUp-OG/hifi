@@ -285,8 +285,8 @@ public:
 
 	bool getIsSeat() const;
 	void setIsSeat(bool value);
-	QString getCurrentSeatUser() const;
-	void setCurrentSeatUser(const QString& value);
+	QUuid getCurrentSeatUser() const;
+	void setCurrentSeatUser(const QUuid& id);
 
     bool getCollisionless() const;
     void setCollisionless(bool value);
@@ -537,7 +537,7 @@ protected:
     bool _visible;
 
 	bool _isSeat;
-	QString _currentSeatUser;
+	QUuid _currentSeatUser;
 
     bool _collisionless;
     uint8_t _collisionMask { ENTITY_COLLISION_MASK_DEFAULT };

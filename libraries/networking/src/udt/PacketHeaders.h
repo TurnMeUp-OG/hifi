@@ -122,7 +122,6 @@ public:
         ReplicatedAvatarIdentity,
         ReplicatedKillAvatar,
         ReplicatedBulkAvatarData,
-		Seat,
         NUM_PACKET_TYPE
     };
 };
@@ -156,7 +155,7 @@ const PacketVersion VERSION_ENTITIES_SUPPORT_SPLIT_MTU = 3;
 const PacketVersion VERSION_ENTITIES_HAS_FILE_BREAKS = VERSION_ENTITIES_SUPPORT_SPLIT_MTU;
 const PacketVersion VERSION_ENTITIES_SUPPORT_DIMENSIONS = 4;
 const PacketVersion VERSION_ENTITIES_MODELS_HAVE_ANIMATION_SETTINGS = 5;
-const PacketVersion VERSION_ENTITIES_HAVE_USER_DATA = 6;
+const PacketVersion VERSION_ENTITIES_HAVE_USER_DATA = 7;
 const PacketVersion VERSION_ENTITIES_HAS_LAST_SIMULATED_TIME = 7;
 const PacketVersion VERSION_MODEL_ENTITIES_SUPPORT_SHAPE_TYPE = 8;
 const PacketVersion VERSION_ENTITIES_LIGHT_HAS_INTENSITY_AND_COLOR_PROPERTIES = 9;
