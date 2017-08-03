@@ -821,9 +821,6 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
 
     READ_ENTITY_PROPERTY(PROP_REGISTRATION_POINT, glm::vec3, updateRegistrationPoint);
 
-	READ_ENTITY_PROPERTY(PROP_ISSEAT, bool, setIsSeat);
-	READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QUuid, setCurrentSeatUser);
-
     READ_ENTITY_PROPERTY(PROP_ANGULAR_DAMPING, float, updateAngularDamping);
     READ_ENTITY_PROPERTY(PROP_VISIBLE, bool, setVisible);
     READ_ENTITY_PROPERTY(PROP_COLLISIONLESS, bool, updateCollisionless);
@@ -855,6 +852,9 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
 
     bytesRead += readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
                                                   propertyFlags, overwriteLocalData, somethingChanged);
+
+	READ_ENTITY_PROPERTY(PROP_ISSEAT, bool, setIsSeat);
+	READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QUuid, setCurrentSeatUser);
 
     ////////////////////////////////////
     // WARNING: Do not add stream content here after the subclass. Always add it before the subclass
@@ -1239,9 +1239,6 @@ EntityItemProperties EntityItem::getProperties(EntityPropertyFlags desiredProper
 
     properties._type = getType();
 
-	COPY_ENTITY_PROPERTY_TO_PROPERTIES(isSeat, getIsSeat);
-	COPY_ENTITY_PROPERTY_TO_PROPERTIES(currentSeatUser, getCurrentSeatUser);
-
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(simulationOwner, getSimulationOwner);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(position, getLocalPosition);
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(dimensions, getDimensions); // NOTE: radius is obsolete
@@ -1284,6 +1281,9 @@ EntityItemProperties EntityItem::getProperties(EntityPropertyFlags desiredProper
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(owningAvatarID, getOwningAvatarID);
 
     COPY_ENTITY_PROPERTY_TO_PROPERTIES(lastEditedBy, getLastEditedBy);
+
+	COPY_ENTITY_PROPERTY_TO_PROPERTIES(isSeat, getIsSeat);
+	COPY_ENTITY_PROPERTY_TO_PROPERTIES(currentSeatUser, getCurrentSeatUser);
 
     properties._defaultSettings = false;
 
