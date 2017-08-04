@@ -850,11 +850,11 @@ int EntityItem::readEntityDataFromBuffer(const unsigned char* data, int bytesLef
     READ_ENTITY_PROPERTY(PROP_QUERY_AA_CUBE, AACube, setQueryAACube);
     READ_ENTITY_PROPERTY(PROP_LAST_EDITED_BY, QUuid, setLastEditedBy);
 
+    READ_ENTITY_PROPERTY(PROP_ISSEAT, bool, setIsSeat);
+    READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QUuid, setCurrentSeatUser);
+
     bytesRead += readEntitySubclassDataFromBuffer(dataAt, (bytesLeftToRead - bytesRead), args,
                                                   propertyFlags, overwriteLocalData, somethingChanged);
-
-	READ_ENTITY_PROPERTY(PROP_ISSEAT, bool, setIsSeat);
-	READ_ENTITY_PROPERTY(PROP_CURRENTSEATUSER, QUuid, setCurrentSeatUser);
 
     ////////////////////////////////////
     // WARNING: Do not add stream content here after the subclass. Always add it before the subclass
