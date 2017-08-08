@@ -429,9 +429,11 @@ function getTeleportTargetType(intersection) {
         return TARGET.NONE;
     }
 
-    var props = Entities.getEntityProperties(intersection.entityID, ['isSeat', 'visible']);
-    if (props.isSeat) {
+    var props = Entities.getEntityProperties(intersection.entityID, ['currentSeatUser' ,'visible']);
+    if (Uuid.isNull(props.currentSeatUser) || !AvatarList.getAvatar(props.currentSeatUser)) {
         return TARGET.SEAT;
+    } else {
+        return TARGET.INVALID;
     }
 
     if (!props.visible) {

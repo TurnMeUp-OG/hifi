@@ -77,7 +77,7 @@
     }
     this.getSeatUser = function() {
         try {
-            var properties = Entities.getEntityProperties(this.entityID, ["isSeat", "currentSeatUser"]);
+            var properties = Entities.getEntityProperties(this.entityID, ["currentSeatUser"]);
 
             // If MyAvatar return my uuid
             if (properties.currentSeatUser === MyAvatar.sessionUUID) {

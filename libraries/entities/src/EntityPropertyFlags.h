@@ -188,8 +188,8 @@ enum EntityPropertyList {
 
     PROP_FILTER_URL,
 
-	PROP_ISSEAT,
-	PROP_CURRENTSEATUSER,
+    PROP_ISSEAT,
+    PROP_CURRENTSEATUSER,
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // ATTENTION: add new properties to end of list just ABOVE this line
     PROP_AFTER_LAST_ITEM,
